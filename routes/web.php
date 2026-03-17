@@ -13,8 +13,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('admin')->name('admin.')->group(function () {
     // Auth
     Route::middleware('guest:admin')->group(function () {
-        Route::get('/login', [AdminAuthController::class, 'login'])->name('login');
-        Route::post('/login', [AdminAuthController::class, 'store']);
+        Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [AdminAuthController::class, 'login']);
     });
 
     Route::middleware('auth:admin')->group(function () {
@@ -24,8 +24,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
         // Merchants
         Route::resource('merchants', MerchantController::class)->only(['index', 'show']);
         Route::post('merchants/{merchant}/verify', [MerchantController::class, 'verify'])->name('merchants.verify');
-        Route::post('merchants/{merchant}/deactivate', [MerchantController::class, 'deactivate'])->name('merchants.deactivate');
-        Route::post('merchants/{merchant}/activate', [MerchantController::class, 'activate'])->name('merchants.activate');
+        Route::post('merchants/{merchant}/toggle-status', [MerchantController::class, 'toggleStatus'])->name('merchants.toggle-status');
 
         // Games
         Route::resource('games', GameController::class);

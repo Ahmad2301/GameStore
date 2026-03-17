@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+use App\Models\User;
 use App\Models\Merchant;
+use App\Models\Order;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -12,24 +13,24 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalTransactions = Transaction::count();
-        $totalUsers = \App\Models\User::count();
+        $totalUsers = User::count();
         $totalMerchants = Merchant::count();
-        $totalRevenue = Order::where('status', 'completed')->sum('total_amount');
-        
-        $dailyTransactions = Transaction::selectRaw('DATE(created_at) as date, count(*) as count')
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->limit(7)
-            ->get();
+        $totalTransactions = Transaction::count();
+        $totalRevenue = Transaction::where('transaction_status', 'settlement')->sum('gross_amount');
+
+        // For chart, get monthly transactions
+        $monthlyTransactions = Transaction::selectRaw("strftime('%m', created_at) as month, COUNT(*) as count")
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
 
         return view('admin.dashboard', compact(
-            'totalTransactions', 
-            'totalUsers', 
-            'totalMerchants', 
+            'totalUsers',
+            'totalMerchants',
+            'totalTransactions',
             'totalRevenue',
-            'dailyTransactions'
+            'monthlyTransactions'
         ));
     }
 }
-
